@@ -18,115 +18,71 @@
     <div class="app">
         <!-- Header -->
         <header class="header">
-            <div class="logo">
-                <span class="logo-icon">💡</span>
-                <span class="logo-text">Eureka!</span>
-            </div>
-            <div class="header-stats">
-                <div class="stat-badge" title="Racha de días">
-                    <span>🔥</span>
-                    <span id="streakCount">0</span>
-                </div>
-                <div class="stat-badge" title="Datos vistos">
-                    <span>🧠</span>
-                    <span id="viewedCount">0</span>
-                </div>
-            </div>
-            <button class="btn-categories" id="btnCategories" onclick="app.toggleCategories()">
-                <span id="currentCategoryIcon">🎲</span>
+            <h1>💡 Eureka!</h1>
+            <button class="categories-toggle" onclick="App.toggleCategories()">
+                Explorar Categorías
             </button>
         </header>
 
         <!-- Categories Panel -->
-        <div class="categories-panel" id="categoriesPanel">
+        <div class="categories-panel">
             <div class="categories-grid">
-                <button class="category-btn active" data-category="all" onclick="app.setCategory('all')">
-                    <span>🎲</span>
-                    <label>Todos</label>
-                </button>
-                <button class="category-btn" data-category="arte" onclick="app.setCategory('arte')">
-                    <span>🎨</span>
-                    <label>Arte</label>
-                </button>
-                <button class="category-btn" data-category="musica" onclick="app.setCategory('musica')">
-                    <span>🎵</span>
-                    <label>Música</label>
-                </button>
-                <button class="category-btn" data-category="historia" onclick="app.setCategory('historia')">
-                    <span>📜</span>
-                    <label>Historia</label>
-                </button>
-                <button class="category-btn" data-category="ciencia" onclick="app.setCategory('ciencia')">
-                    <span>🔬</span>
-                    <label>Ciencia</label>
-                </button>
-                <button class="category-btn" data-category="cultura" onclick="app.setCategory('cultura')">
-                    <span>🌍</span>
-                    <label>Cultura</label>
-                </button>
-                <button class="category-btn" data-category="naturaleza" onclick="app.setCategory('naturaleza')">
-                    <span>🌿</span>
-                    <label>Naturaleza</label>
-                </button>
-                <button class="category-btn" data-category="espacio" onclick="app.setCategory('espacio')">
-                    <span>🚀</span>
-                    <label>Espacio</label>
-                </button>
+                <div class="category-btn" onclick="App.setCategory('all')">
+                    <span class="emoji">🎲</span>
+                    <span>Todos</span>
+                </div>
+                <div class="category-btn" onclick="App.setCategory('arte')">
+                    <span class="emoji">🎨</span>
+                    <span>Arte</span>
+                </div>
+                <div class="category-btn" onclick="App.setCategory('musica')">
+                    <span class="emoji">🎵</span>
+                    <span>Música</span>
+                </div>
+                <div class="category-btn" onclick="App.setCategory('historia')">
+                    <span class="emoji">📜</span>
+                    <span>Historia</span>
+                </div>
+                <div class="category-btn" onclick="App.setCategory('ciencia')">
+                    <span class="emoji">🔬</span>
+                    <span>Ciencia</span>
+                </div>
+                <div class="category-btn" onclick="App.setCategory('cultura')">
+                    <span class="emoji">🌍</span>
+                    <span>Cultura</span>
+                </div>
+                <div class="category-btn" onclick="App.setCategory('naturaleza')">
+                    <span class="emoji">🌿</span>
+                    <span>Naturaleza</span>
+                </div>
+                <div class="category-btn" onclick="App.setCategory('espacio')">
+                    <span class="emoji">🚀</span>
+                    <span>Espacio</span>
+                </div>
             </div>
         </div>
 
-        <!-- Main Card -->
-        <main class="main">
-            <div class="card-container">
-                <div class="card" id="factCard">
-                    <div class="card-category" id="factCategory">
-                        <span class="category-icon" id="factCategoryIcon">🎨</span>
-                        <span class="category-name" id="factCategoryName">Arte</span>
-                    </div>
-                    
-                    <div class="card-visual" id="factVisual">
-                        <img class="visual-image" id="factImage" src="" alt="" loading="lazy">
-                        <span class="visual-emoji" id="factEmoji">🖼️</span>
-                        <div class="image-loader" id="imageLoader"></div>
-                    </div>
-                    
-                    <h1 class="card-title" id="factTitle">Cargando...</h1>
-                    
-                    <p class="card-description" id="factDescription">
-                        Descubre datos fascinantes sobre arte, ciencia, historia y más.
-                    </p>
-                    
-                    <div class="card-meta" id="factMeta">
-                        <span class="meta-tag" id="factEra"></span>
-                        <span class="meta-tag" id="factLocation"></span>
-                    </div>
-                </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="loading">
+                <span>💡</span>
+                <p>Cargando datos curiosos...</p>
             </div>
-            
-            <p class="swipe-hint">
-                <span>👆</span> Toca para otro dato
-            </p>
         </main>
 
-        <!-- Bottom Actions -->
-        <footer class="footer">
-            <button class="action-btn" onclick="app.share()">
-                <span>📤</span>
-                <label>Compartir</label>
+        <!-- Footer Actions -->
+        <footer class="footer-actions">
+            <button class="action-btn" onclick="App.share()">
+                📤
             </button>
-            <button class="action-btn primary" onclick="app.nextFact()">
-                <span>💡</span>
-                <label>Otro dato</label>
+            <button class="action-btn primary" onclick="App.nextFact()">
+                →
             </button>
-            <button class="action-btn" onclick="app.save()">
-                <span id="saveIcon">🤍</span>
-                <label>Guardar</label>
+            <button class="action-btn" onclick="App.save()">
+                ❤️
             </button>
         </footer>
     </div>
-
-    <!-- Saved Toast -->
-    <div class="toast" id="toast">¡Guardado!</div>
 
     <script src="js/facts.js"></script>
     <script src="js/app.js"></script>
