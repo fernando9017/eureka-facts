@@ -1,248 +1,345 @@
-// 💡 Eureka! v2.0 - App Logic
-
+// App principal de Eureka!
 class EurekaApp {
     constructor() {
         this.currentCategory = 'all';
-        this.currentFact = null;
-        this.viewedFacts = new Set();
-        this.savedFacts = JSON.parse(localStorage.getItem('eureka-saved') || '[]');
-        this.stats = JSON.parse(localStorage.getItem('eureka-stats') || '{"totalViewed":0,"streak":0,"lastVisit":null}');
+        this.currentFactIndex = 0;
+        this.availableFacts = [];
+        this.savedFacts = this.loadSavedFacts();
+        this.isTransitioning = false;
+        
         this.init();
     }
-    
+
     init() {
-        this.updateStreak();
-        this.showDailyFact();
-        this.setupSwipe();
-        this.updateStatsUI();
+        this.updateAvailableFacts();
+        this.displayCurrentFact();
+        this.updateCategoryButtons();
+        
+        // Agregar listeners para gestos de swipe
+        this.addSwipeListeners();
     }
-    
-    updateStreak() {
-        const today = new Date().toDateString();
-        const lastVisit = this.stats.lastVisit;
-        
-        if (lastVisit) {
-            const lastDate = new Date(lastVisit);
-            const diffDays = Math.floor((new Date(today) - lastDate) / (1000 * 60 * 60 * 24));
-            
-            if (diffDays === 1) {
-                // Consecutive day
-                this.stats.streak++;
-            } else if (diffDays > 1) {
-                // Streak broken
-                this.stats.streak = 1;
-            }
-            // Same day = no change
-        } else {
-            this.stats.streak = 1;
-        }
-        
-        if (this.stats.lastVisit !== today) {
-            this.stats.lastVisit = today;
-            this.saveStats();
-        }
+
+    // Toggle panel de categorías
+    toggleCategories() {
+        const panel = document.querySelector('.categories-panel');
+        panel.classList.toggle('active');
     }
-    
-    showDailyFact() {
-        // Get consistent "fact of the day" based on date
-        const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-        const factIndex = dayOfYear % FACTS.length;
+
+    // Cambiar categoría activa
+    setCategory(category) {
+        if (this.isTransitioning) return;
         
-        this.currentFact = FACTS[factIndex];
-        this.displayFact(this.currentFact, true);
+        this.currentCategory = category;
+        this.currentFactIndex = 0;
+        this.updateAvailableFacts();
+        this.updateCategoryButtons();
+        this.displayCurrentFact(true);
+        
+        // Cerrar panel de categorías
+        this.toggleCategories();
     }
-    
-    setupSwipe() {
-        const card = document.getElementById('factCard');
-        let startX, startY;
-        
-        card.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        });
-        
-        card.addEventListener('touchend', (e) => {
-            const endX = e.changedTouches[0].clientX;
-            const endY = e.changedTouches[0].clientY;
-            const diffX = startX - endX;
-            const diffY = Math.abs(startY - endY);
-            
-            if (Math.abs(diffX) > 50 && diffY < 100) {
-                this.nextFact();
-            }
-        });
-        
-        card.addEventListener('click', () => this.nextFact());
-    }
-    
-    getFilteredFacts() {
+
+    // Actualizar lista de hechos disponibles según categoría
+    updateAvailableFacts() {
         if (this.currentCategory === 'all') {
-            return FACTS;
+            this.availableFacts = [...FACTS];
+        } else {
+            this.availableFacts = FACTS.filter(fact => fact.category === this.currentCategory);
         }
-        return FACTS.filter(f => f.category === this.currentCategory);
+        
+        // Barajar los hechos para variedad
+        this.shuffleArray(this.availableFacts);
     }
-    
+
+    // Barajar array (Fisher-Yates shuffle)
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Mostrar el hecho actual
+    displayCurrentFact(withTransition = false) {
+        const card = document.querySelector('.fact-card');
+        const container = document.querySelector('.main-content');
+
+        if (!this.availableFacts.length) {
+            this.showNoFactsMessage();
+            return;
+        }
+
+        const fact = this.availableFacts[this.currentFactIndex];
+        
+        if (withTransition && card) {
+            this.isTransitioning = true;
+            card.classList.add('swipe-out');
+            
+            setTimeout(() => {
+                this.renderFact(fact);
+                card.classList.remove('swipe-out');
+                card.classList.add('swipe-in');
+                
+                setTimeout(() => {
+                    card.classList.remove('swipe-in');
+                    this.isTransitioning = false;
+                }, 300);
+            }, 300);
+        } else {
+            this.renderFact(fact);
+        }
+    }
+
+    // Renderizar el HTML del hecho
+    renderFact(fact) {
+        const container = document.querySelector('.main-content');
+        
+        container.innerHTML = `
+            <div class="fact-card">
+                <span class="fact-emoji">${fact.emoji}</span>
+                <h2 class="fact-title">${fact.title}</h2>
+                <p class="fact-description">${fact.description}</p>
+                <div class="fact-meta">
+                    ${fact.era ? `<span>📅 ${fact.era}</span>` : ''}
+                    ${fact.location ? `<span>📍 ${fact.location}</span>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // Mostrar mensaje cuando no hay hechos
+    showNoFactsMessage() {
+        const container = document.querySelector('.main-content');
+        const categoryInfo = CATEGORIES[this.currentCategory];
+        
+        container.innerHTML = `
+            <div class="no-facts">
+                <span class="emoji">${categoryInfo?.emoji || '🤔'}</span>
+                <p>No hay datos curiosos en esta categoría aún.</p>
+                <p><small>¡Prueba otra categoría!</small></p>
+            </div>
+        `;
+    }
+
+    // Ir al siguiente hecho
     nextFact() {
-        const facts = this.getFilteredFacts();
+        if (this.isTransitioning || !this.availableFacts.length) return;
         
-        if (this.viewedFacts.size >= facts.length) {
-            this.viewedFacts.clear();
-        }
-        
-        let availableFacts = facts.filter((_, i) => !this.viewedFacts.has(facts.indexOf(_)));
-        if (availableFacts.length === 0) {
-            availableFacts = facts;
-            this.viewedFacts.clear();
-        }
-        
-        const randomIndex = Math.floor(Math.random() * availableFacts.length);
-        const fact = availableFacts[randomIndex];
-        
-        this.currentFact = fact;
-        this.viewedFacts.add(FACTS.indexOf(fact));
-        
-        // Update stats
-        this.stats.totalViewed++;
-        this.saveStats();
-        this.updateStatsUI();
-        
-        this.displayFact(fact);
+        this.currentFactIndex = (this.currentFactIndex + 1) % this.availableFacts.length;
+        this.displayCurrentFact(true);
     }
-    
-    displayFact(fact, isDaily = false) {
-        const card = document.getElementById('factCard');
-        const category = CATEGORIES[fact.category];
-        const visual = document.getElementById('factVisual');
-        const img = document.getElementById('factImage');
+
+    // Compartir hecho actual
+    async share() {
+        const fact = this.availableFacts[this.currentFactIndex];
+        if (!fact) return;
+
+        const shareText = `💡 ¡Dato curioso!\n\n${fact.title}\n\n${fact.description}\n\n🔗 Descubre más datos en Eureka!`;
+        const shareUrl = window.location.href;
+
+        // Web Share API si está disponible
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `💡 ${fact.title}`,
+                    text: shareText,
+                    url: shareUrl
+                });
+            } catch (err) {
+                console.log('Compartir cancelado');
+            }
+        } else {
+            // Fallback: copiar al clipboard
+            try {
+                await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+                this.showIndicator('📋 ¡Copiado al portapapeles!');
+            } catch (err) {
+                // Fallback final: crear link mailto
+                const mailtoLink = `mailto:?subject=${encodeURIComponent('💡 ' + fact.title)}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
+                window.open(mailtoLink);
+            }
+        }
+    }
+
+    // Guardar/quitar de favoritos
+    save() {
+        const fact = this.availableFacts[this.currentFactIndex];
+        if (!fact) return;
+
+        const factId = this.getFactId(fact);
+        const heartBtn = document.querySelector('.action-btn[onclick="App.save()"]');
         
-        card.classList.add('animate-out');
+        if (this.savedFacts.includes(factId)) {
+            // Quitar de favoritos
+            this.savedFacts = this.savedFacts.filter(id => id !== factId);
+            heartBtn.style.color = '#667eea';
+            this.showIndicator('💔 Quitado de favoritos');
+        } else {
+            // Agregar a favoritos
+            this.savedFacts.push(factId);
+            heartBtn.style.color = '#e74c3c';
+            this.showIndicator('❤️ ¡Guardado en favoritos!');
+        }
+
+        this.saveFavoritesToStorage();
+        this.updateSaveButton();
+    }
+
+    // Generar ID único para un hecho
+    getFactId(fact) {
+        return `${fact.category}-${fact.title.slice(0, 20)}`.replace(/\s+/g, '-').toLowerCase();
+    }
+
+    // Actualizar apariencia del botón de guardar
+    updateSaveButton() {
+        const fact = this.availableFacts[this.currentFactIndex];
+        if (!fact) return;
+
+        const factId = this.getFactId(fact);
+        const heartBtn = document.querySelector('.action-btn[onclick="App.save()"]');
+        
+        if (heartBtn) {
+            heartBtn.style.color = this.savedFacts.includes(factId) ? '#e74c3c' : '#667eea';
+        }
+    }
+
+    // Actualizar botones de categoría activos
+    updateCategoryButtons() {
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            const category = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
+            btn.classList.toggle('active', category === this.currentCategory);
+        });
+    }
+
+    // Mostrar indicador temporal
+    showIndicator(message) {
+        const indicator = document.createElement('div');
+        indicator.className = 'saved-indicator';
+        indicator.textContent = message;
+        document.body.appendChild(indicator);
         
         setTimeout(() => {
-            document.getElementById('factCategoryIcon').textContent = category.icon;
-            document.getElementById('factCategoryName').textContent = isDaily ? '✨ Dato del Día' : category.name;
-            document.getElementById('factEmoji').textContent = fact.emoji;
-            document.getElementById('factTitle').textContent = fact.title;
-            document.getElementById('factDescription').textContent = fact.description;
-            document.getElementById('factEra').textContent = fact.era;
-            document.getElementById('factLocation').textContent = fact.location;
+            indicator.remove();
+        }, 2000);
+    }
+
+    // Cargar favoritos del localStorage
+    loadSavedFacts() {
+        try {
+            const saved = localStorage.getItem('eureka-favorites');
+            return saved ? JSON.parse(saved) : [];
+        } catch (err) {
+            return [];
+        }
+    }
+
+    // Guardar favoritos al localStorage
+    saveFavoritesToStorage() {
+        try {
+            localStorage.setItem('eureka-favorites', JSON.stringify(this.savedFacts));
+        } catch (err) {
+            console.warn('No se pudieron guardar los favoritos');
+        }
+    }
+
+    // Agregar listeners para gestos de swipe
+    addSwipeListeners() {
+        let startX = 0;
+        let startY = 0;
+        let isSwipe = false;
+
+        const container = document.querySelector('.main-content');
+
+        container.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isSwipe = false;
+        });
+
+        container.addEventListener('touchmove', (e) => {
+            if (!startX || !startY) return;
             
-            // Load image
-            if (fact.image) {
-                visual.classList.add('loading');
-                img.classList.remove('loaded');
-                
-                const imageUrl = getImageUrl(fact.image);
-                img.onload = () => {
-                    visual.classList.remove('loading');
-                    img.classList.add('loaded');
-                };
-                img.onerror = () => {
-                    visual.classList.remove('loading');
-                    img.classList.remove('loaded');
-                };
-                img.src = imageUrl;
-                img.alt = fact.title;
+            const diffX = Math.abs(e.touches[0].clientX - startX);
+            const diffY = Math.abs(e.touches[0].clientY - startY);
+            
+            // Es un swipe horizontal si el movimiento horizontal > vertical
+            if (diffX > diffY && diffX > 30) {
+                isSwipe = true;
+                e.preventDefault(); // Prevenir scroll
+            }
+        });
+
+        container.addEventListener('touchend', (e) => {
+            if (!isSwipe || !startX) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const diffX = startX - endX;
+            
+            // Swipe left (siguiente hecho)
+            if (diffX > 50) {
+                this.nextFact();
             }
             
-            const isSaved = this.savedFacts.some(f => f.title === fact.title);
-            document.getElementById('saveIcon').textContent = isSaved ? '❤️' : '🤍';
-            
-            card.dataset.category = fact.category;
-            if (isDaily) card.classList.add('daily');
-            else card.classList.remove('daily');
-            
-            card.classList.remove('animate-out');
-            card.classList.add('animate-in');
-            
-            setTimeout(() => card.classList.remove('animate-in'), 300);
-            
-            if (navigator.vibrate) navigator.vibrate(30);
-            
-        }, 150);
-    }
-    
-    updateStatsUI() {
-        const streakEl = document.getElementById('streakCount');
-        const viewedEl = document.getElementById('viewedCount');
-        
-        if (streakEl) streakEl.textContent = this.stats.streak;
-        if (viewedEl) viewedEl.textContent = this.stats.totalViewed;
-    }
-    
-    saveStats() {
-        localStorage.setItem('eureka-stats', JSON.stringify(this.stats));
-    }
-    
-    toggleCategories() {
-        const panel = document.getElementById('categoriesPanel');
-        panel.classList.toggle('open');
-    }
-    
-    setCategory(category) {
-        this.currentCategory = category;
-        this.viewedFacts.clear();
-        
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.category === category);
+            // Reset
+            startX = 0;
+            startY = 0;
+            isSwipe = false;
         });
-        
-        document.getElementById('currentCategoryIcon').textContent = CATEGORIES[category].icon;
-        
-        this.toggleCategories();
-        this.nextFact();
-    }
-    
-    save() {
-        if (!this.currentFact) return;
-        
-        const index = this.savedFacts.findIndex(f => f.title === this.currentFact.title);
-        
-        if (index > -1) {
-            this.savedFacts.splice(index, 1);
-            document.getElementById('saveIcon').textContent = '🤍';
-            this.showToast('Eliminado de guardados');
-        } else {
-            this.savedFacts.push(this.currentFact);
-            document.getElementById('saveIcon').textContent = '❤️';
-            this.showToast('¡Guardado! 💡');
-        }
-        
-        localStorage.setItem('eureka-saved', JSON.stringify(this.savedFacts));
-        
-        if (navigator.vibrate) navigator.vibrate([30, 30, 30]);
-    }
-    
-    share() {
-        if (!this.currentFact) return;
-        
-        const fact = this.currentFact;
-        const text = `💡 ¿Sabías que...\n\n${fact.title}\n\n${fact.description}\n\n✨ Descubre más datos increíbles:\n👉 https://fernando9017.github.io/eureka/`;
-        
-        if (navigator.share) {
-            navigator.share({
-                title: 'Eureka! 💡',
-                text: text,
-                url: 'https://fernando9017.github.io/eureka/'
-            }).catch(() => this.copyToClipboard(text));
-        } else {
-            this.copyToClipboard(text);
-        }
-    }
-    
-    copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            this.showToast('¡Copiado! 📋');
+
+        // También para mouse en desktop
+        let isMouseDown = false;
+        let mouseStartX = 0;
+
+        container.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseStartX = e.clientX;
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            e.preventDefault();
+        });
+
+        container.addEventListener('mouseup', (e) => {
+            if (!isMouseDown) return;
+            
+            const diffX = mouseStartX - e.clientX;
+            
+            if (Math.abs(diffX) > 100) {
+                if (diffX > 0) {
+                    this.nextFact();
+                }
+            }
+            
+            isMouseDown = false;
+            mouseStartX = 0;
         });
     }
-    
-    showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
+
+    // Método para actualizar botón de guardar cuando cambie el hecho
+    updateCurrentFact() {
+        this.updateSaveButton();
     }
 }
 
-// Initialize
-const app = new EurekaApp();
+// Inicializar la app cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    window.App = new EurekaApp();
+    
+    // Actualizar botón de guardar cuando se muestre un nuevo hecho
+    const originalDisplayFact = window.App.displayCurrentFact;
+    window.App.displayCurrentFact = function(withTransition = false) {
+        originalDisplayFact.call(this, withTransition);
+        setTimeout(() => this.updateSaveButton(), 100);
+    };
+});
+
+// Prevenir zoom en doble tap en iOS
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (event) {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
