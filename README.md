@@ -1,90 +1,79 @@
-# 💡 Eureka! - Alimenta tu curiosidad
+# 💡 Eureka! - Datos Curiosos
 
-Descubre datos fascinantes sobre arte, ciencia, historia, música y más. Una dosis diaria de conocimiento para mentes curiosas.
+**App móvil de datos curiosos con navegación por swipe**
 
-**[💡 DESCUBRIR DATOS](https://fernando9017.github.io/eureka/)**
+🚀 **[Probar la app →](https://fernando9017.github.io/eureka-facts/)**
 
-![Eureka](https://img.shields.io/badge/Made%20with-💡-yellow)
-![Facts](https://img.shields.io/badge/Facts-55+-blue)
-![Categories](https://img.shields.io/badge/Categories-7-green)
+## ✨ Características
 
-## 🎯 ¿Qué es Eureka?
+- 🎯 **8 categorías**: Arte, Música, Historia, Ciencia, Cultura, Naturaleza, Espacio
+- 📚 **60+ datos curiosos** con emojis y contexto histórico/geográfico
+- 👆 **Navegación por swipe** (táctil y mouse)
+- ❤️ **Sistema de favoritos** persistente
+- 📤 **Compartir** con Web Share API + fallbacks
+- 🎨 **Diseño glassmorfismo** mobile-first
+- ✨ **Animaciones suaves** entre tarjetas
 
-Una app tipo "Daily Art" pero para todo tipo de conocimiento. Swipea para descubrir datos increíbles que no sabías.
+## 🎯 Target
 
-## 📚 Categorías
-
-| Categoría | Emoji | Ejemplos |
-|-----------|-------|----------|
-| **Arte** | 🎨 | Van Gogh, Frida Kahlo, La Mona Lisa |
-| **Música** | 🎵 | Mozart, Beethoven, Stradivarius |
-| **Historia** | 📜 | Cleopatra, Vikingos, Gladiadores |
-| **Ciencia** | 🔬 | ADN, Rayos, Cerebro |
-| **Cultura** | 🌍 | Día de Muertos, Coffee, Sushi |
-| **Naturaleza** | 🌿 | Pulpos, Tiburones, Mariposas |
-| **Espacio** | 🚀 | Venus, Agujeros negros, Luna |
-
-## ✨ Features
-
-- 📱 Mobile-first, diseño limpio
-- 🎲 Modo aleatorio o por categoría
-- 💾 Guardar favoritos (localStorage)
-- 📤 Compartir fácil
-- 🌙 Dark mode automático
-- 👆 Swipe o tap para siguiente
-
-## 🧠 Datos de ejemplo
-
-> **🎨 Van Gogh solo vendió UNA pintura en vida**
-> "The Red Vineyard" se vendió por 400 francos en 1890. Hoy sus obras valen cientos de millones.
-
-> **🐙 Los pulpos tienen 3 corazones y sangre azul**
-> Dos corazones bombean sangre a las branquias, uno al cuerpo. Su sangre usa cobre, por eso es azul.
-
-> **🌍 Un día en Venus es más largo que un año**
-> Venus tarda 243 días en rotar pero solo 225 en orbitar el Sol.
+Audiencia hispanohablante que busca:
+- Contenido educativo rápido y divertido
+- Hechos sorprendentes para conversaciones
+- Material shareable para redes sociales
 
 ## 🛠️ Tech Stack
 
-- HTML5
-- CSS3 (con dark mode)
-- Vanilla JavaScript
-- localStorage para favoritos
-- GitHub Pages
+- **HTML5** + **CSS3** + **Vanilla JS**
+- Sin backend, 100% cliente
+- Diseño responsive mobile-first
+- PWA-ready con localStorage
 
-## 📊 Stats
+## 🚀 Instalación Local
 
-- 55+ datos curados
-- 7 categorías
-- Contenido en español
-- Sin backend necesario
+```bash
+# Clonar
+git clone https://github.com/fernando9017/eureka-facts.git
+cd eureka-facts
 
-## 🚀 Deploy
-
-```
-https://fernando9017.github.io/eureka/
+# Abrir en navegador
+open index.html
 ```
 
-## 🤝 Contribuir
+## 📱 Uso
 
-¿Tienes un dato increíble? ¡Abre un PR para agregarlo a la base de datos!
+1. **Navegar**: Swipe left o click "→" para siguiente dato
+2. **Filtrar**: Click en "Explorar Categorías" para filtrar por tema
+3. **Guardar**: Click en ❤️ para agregar a favoritos
+4. **Compartir**: Click en 📤 para compartir el dato actual
 
-Formato:
-```javascript
-{
-    category: "ciencia",
-    emoji: "🧪",
-    title: "Título intrigante",
-    description: "Explicación en 2-3 oraciones.",
-    era: "Siglo/Época",
-    location: "Lugar"
-}
+## 🎨 Diseño
+
+- **Colores**: Gradientes violeta/azul (#667eea → #764ba2)
+- **Tipografía**: Space Grotesk (Google Fonts)
+- **Estilo**: Glassmorfismo con backdrop-filter
+- **Interacciones**: Animaciones CSS suaves
+
+## 📂 Estructura
+
+```
+eureka-facts/
+├── index.html          # Estructura principal
+├── css/
+│   └── style.css       # Estilos mobile-first
+├── js/
+│   ├── facts.js        # Base de datos de hechos
+│   └── app.js          # Lógica de la aplicación
+└── README.md           # Este archivo
 ```
 
-## 📄 Licencia
+## 🔮 Roadmap
 
-MIT - Comparte el conocimiento 💡
+- [ ] PWA completa con Service Worker
+- [ ] Más categorías (Deportes, Tecnología)
+- [ ] Sistema de streak diario
+- [ ] Modo dark/light
+- [ ] Sonidos y haptic feedback
 
 ---
 
-Hecho con 💡 en Guadalajara, México por [ProfeGDL](https://github.com/fernando9017)
+**Creado por [@ProfeGDL](https://github.com/fernando9017)** 🎓
